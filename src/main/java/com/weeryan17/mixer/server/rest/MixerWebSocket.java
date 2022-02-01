@@ -29,7 +29,7 @@ public class MixerWebSocket {
     public void connected(Session session) throws IOException {
         String key = session.getUpgradeRequest().getHeader("key");
         if (key == null) {
-            session.close();
+            // new client
             return;
         }
         Client client = ClientManager.getInstance().getClientWithKey(key);
@@ -54,7 +54,7 @@ public class MixerWebSocket {
         CommandData commandData = gson.fromJson(jsonObject.get("data").getAsJsonObject(), CommandType.getByCommand(commandStr).getJavaClass());
 
         Client client = ClientManager.getInstance().getClientWithSession(session);
-        if (client.isPendingApproval() && !commandStr.equals("identify")) {
+        if (client == null && !commandStr.equals("identify")) {
             return;
         }
     }

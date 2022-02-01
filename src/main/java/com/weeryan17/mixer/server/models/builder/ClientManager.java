@@ -3,6 +3,8 @@ package com.weeryan17.mixer.server.models.builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.weeryan17.mixer.server.models.Client;
+import com.weeryan17.mixer.server.rest.MixerWebSocket;
+import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
@@ -19,9 +21,9 @@ public class ClientManager {
         this.gson = gson;
     }
 
-    public void buildClient(String ip, int port) throws IOException {
+    public void buildClient(MixerWebSocket webSocket, Session session, int port) throws IOException {
         Client client = new Client(gson, heartbeat);
-        client.connect(ip, port);
+        client.accept(webSocket, session, port);
         clientList.add(client);
     }
 
@@ -44,7 +46,7 @@ public class ClientManager {
     private static ClientManager INS;
     public static ClientManager getInstance() {
         if (INS == null) {
-            INS = new ClientManager(new GsonBuilder().create());
+            INS = new ClientManager(new GsonBuilder().registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory()).create());
         }
         return INS;
     }

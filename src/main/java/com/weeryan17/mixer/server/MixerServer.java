@@ -1,21 +1,25 @@
 package com.weeryan17.mixer.server;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.weeryan17.mixer.server.rest.WebController;
 import com.weeryan17.mixer.server.socket.audio.AudioConnectSocketRunnable;
 import com.weeryan17.mixer.server.socket.BroadcastSocketRunnable;
 import com.weeryan17.mixer.shared.models.Version;
 import com.weeryan17.rudp.ReliableServerSocket;
+import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.jaudiolibs.jnajack.Jack;
 
+import java.io.FileInputStream;
 import java.net.DatagramSocket;
+import java.util.Properties;
 import java.util.Timer;
 
 public class MixerServer {
 
     private static MixerServer INS;
 
-    private final Version serverVersion = new Version(1, 0, 0);
+    private Version serverVersion;
     private final Version audioVersion = new Version(1, 0, 0);
     private final Version apiVersion = new Version(1, 0, 0);
 
@@ -34,12 +38,17 @@ public class MixerServer {
     private int tcpPort;
 
     public void init(String... args) throws Exception {
+        Properties properties = new Properties();
+        properties.load(getClass().getClassLoader().getResourceAsStream("version.properties"));
+        serverVersion = Version.fromString(properties.getProperty("server.version"));
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory()).create();
+
         DatagramSocket broadcastSocket = new DatagramSocket(10255);
         broadcastSocket.setBroadcast(true);
         ReliableServerSocket audioServerSocket = new ReliableServerSocket(0);
         udpPort = audioServerSocket.getLocalPort();
 
-        Thread broadcastThread = new Thread(new BroadcastSocketRunnable(broadcastSocket), "broadcastThread");
+        Thread broadcastThread = new Thread(new BroadcastSocketRunnable(broadcastSocket, gson), "broadcastThread");
         broadcastThread.start();
         broadCastThreadId = broadcastThread.getId();
 
@@ -50,7 +59,7 @@ public class MixerServer {
         Timer timer = new Timer();
         timer.schedule(new HeartBeatTask(), 1000, 500);
 
-        WebController webController = new WebController(new GsonBuilder().create());
+        WebController webController = new WebController(gson);
         tcpPort = webController.initController();
 
         Jack jack = Jack.getInstance();
