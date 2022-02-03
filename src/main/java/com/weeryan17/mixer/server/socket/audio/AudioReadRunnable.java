@@ -13,9 +13,11 @@ public class AudioReadRunnable implements Runnable {
 
     private ThreadExecutorContainer threadExecutorContainer;
     private Socket socket;
-    public AudioReadRunnable(ThreadExecutorContainer threadExecutorContainer, Socket socket) {
+    private String key;
+    public AudioReadRunnable(ThreadExecutorContainer threadExecutorContainer, Socket socket, String key) {
         this.threadExecutorContainer = threadExecutorContainer;
         this.socket = socket;
+        this.key = key;
     }
 
     @Override
@@ -29,17 +31,12 @@ public class AudioReadRunnable implements Runnable {
         }
         while (true) {
             try {
-                ByteBuffer lenBuf = ByteBuffer.wrap(in.readNBytes(4));
-                int len = lenBuf.getInt();
-                byte[] rawData = in.readNBytes(len);
-                ByteBuffer buffer = ByteBuffer.wrap(rawData);
-                int keyLen = buffer.getInt();
-                byte[] keyBytes = Arrays.copyOfRange(rawData, 4, 4 + keyLen);
-                String key = new String(keyBytes, StandardCharsets.UTF_8);
-                byte[] data = Arrays.copyOfRange(rawData, 4 + keyLen, rawData.length);
+                int len = ByteBuffer.wrap(in.readNBytes(4)).getInt();
+                byte[] data = in.readNBytes(len);
                 threadExecutorContainer.queueThread(new AudioProcessRunnable(data, key));
             } catch (IOException e) {
                 e.printStackTrace();
+                return;
             }
         }
     }

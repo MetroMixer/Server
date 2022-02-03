@@ -3,8 +3,11 @@ package com.weeryan17.mixer.server.models;
 import com.google.common.collect.EvictingQueue;
 import com.google.gson.Gson;
 import com.weeryan17.mixer.server.MixerServer;
+import com.weeryan17.mixer.server.socket.audio.AudioSendRunnable;
+import com.weeryan17.mixer.server.utils.ThreadExecutorContainer;
 import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
 import com.weeryan17.mixer.shared.models.ChannelType;
+import com.weeryan17.rudp.ReliableServerSocket;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jaudiolibs.jnajack.JackClient;
 import org.jaudiolibs.jnajack.JackException;
@@ -15,6 +18,8 @@ import org.jaudiolibs.jnajack.JackPortType;
 import org.jaudiolibs.jnajack.JackProcessCallback;
 import org.jaudiolibs.jnajack.JackStatus;
 
+import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -33,15 +38,21 @@ public class Client {
 
     private transient Queue<List<FloatBuffer>> floatBuffersQueue = EvictingQueue.create(MixerServer.getInstance().getConfig().getMaxAudioQueueSize());
 
+    private transient Socket socket;
+
     private IdentifyProperties id;
 
     private long beatInterval;
-    public Client(Gson gson, IdentifyProperties id, long beatInterval) throws JackException {
+
+    private transient ThreadExecutorContainer sendContainer;
+
+    public Client(Gson gson, IdentifyProperties id, long beatInterval, ThreadExecutorContainer sendContainer) throws JackException {
         this.gson = gson;
         this.beatInterval = beatInterval;
         this.id = id;
+        this.sendContainer = sendContainer;
         jackClient = MixerServer.getInstance().getJack().openClient(id.getId(), EnumSet.noneOf(JackOptions.class), EnumSet.noneOf(JackStatus.class));
-        jackClient.setProcessCallback(new Processor());
+        jackClient.setProcessCallback(new Processor(this));
     }
 
     public int createChannel(String name, ChannelType type) throws JackException {
@@ -95,7 +106,20 @@ public class Client {
         session = null;
     }
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
     private class Processor implements JackProcessCallback {
+
+        private Client client;
+        private Processor(Client client) {
+            this.client = client;
+        }
 
         @Override
         public boolean process(JackClient client, int nframes) {
@@ -105,13 +129,27 @@ public class Client {
                     inputs.get(i).getFloatBuffer().put(floatBuffers.get(i));
                 }
             }
-            List<FloatBuffer> toSend = new ArrayList<>();
+            List<ByteBuffer> toSend = new ArrayList<>();
+            int size = 0;
             for (JackPort port : outputs) {
-                toSend.add(port.getFloatBuffer());
+                FloatBuffer fBuffer = port.getFloatBuffer();
+                ByteBuffer buffer = ByteBuffer.allocate((fBuffer.array().length * 4) + 4);
+                buffer.putInt(fBuffer.array().length);
+                for (float f : fBuffer.array()) {
+                    buffer.putFloat(f);
+                }
+                toSend.add(buffer);
+                size += buffer.array().length;
             }
             if (toSend.size() > 0) {
-                //TODO send to client;
+                ByteBuffer send = ByteBuffer.allocate(size + 4);
+                send.putInt(toSend.size());
+                for (ByteBuffer buffer : toSend) {
+                    send.put(buffer);
+                }
+                sendContainer.queueThread(new AudioSendRunnable(this.client, send.array()));
             }
+
             return true;
         }
     }

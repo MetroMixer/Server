@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.weeryan17.mixer.server.MixerServer;
 import com.weeryan17.mixer.server.models.Client;
 import com.weeryan17.mixer.server.models.PendingContainer;
+import com.weeryan17.mixer.server.utils.ThreadExecutorContainer;
 import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.eclipse.jetty.websocket.api.Session;
@@ -19,6 +20,8 @@ public class ClientManager {
     private List<Client> clientList = new ArrayList<>();
     private List<PendingContainer> pendingClients = new ArrayList<>();
 
+    private final ThreadExecutorContainer sendContainer = new ThreadExecutorContainer("AudioSendProcess");
+
     private Gson gson;
     private long heartbeat;
     public ClientManager(Gson gson, long heartbeat) {
@@ -27,7 +30,7 @@ public class ClientManager {
     }
 
     public Client buildClient(String key, IdentifyProperties id) throws JackException {
-        Client client = new Client(gson, id, heartbeat);
+        Client client = new Client(gson, id, heartbeat, sendContainer);
         client.setKey(key);
         clientList.add(client);
         pendingClients.remove(pendingClients.stream().filter(pendingContainer -> pendingContainer.getIdentifyProperties().equals(id)).findFirst().orElse(null));

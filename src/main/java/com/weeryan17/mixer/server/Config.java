@@ -25,6 +25,7 @@ public class Config {
     private int audioUdpPort;
     private int audioTcpPort;
     private int tcpPort;
+    private boolean compress;
 
     public void init() {
         FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(new File(commandLineArgs.getConfigFile()));
@@ -40,6 +41,7 @@ public class Config {
         audioTcpPort = fileConfiguration.getInt("net.audio.tcp", commandLineArgs.getAudioTcpPort());
         apiListen = fileConfiguration.getString("net.api.listen", null);
         tcpPort = fileConfiguration.getInt("net.api.port", commandLineArgs.getTcpPort());
+        compress = fileConfiguration.getBoolean("audio.compress", commandLineArgs.shouldCompress());
 
     }
 
@@ -85,5 +87,9 @@ public class Config {
 
     public int getTcpPort() {
         return tcpPort;
+    }
+
+    public boolean shouldCompress() {
+        return compress;
     }
 }

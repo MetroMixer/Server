@@ -25,6 +25,8 @@ public class Args {
     private int tcpPort = 0;
     @Parameter(names = {"-h", "--help"}, help = true, description = "Displays the help message")
     private boolean help;
+    @Parameter(names = {"-c", "--compress"}, description = "Sets weather to compress the audio when sending to a client or not.")
+    private boolean compress = true;
 
     public String getConfigFile() {
         return configFile;
@@ -68,5 +70,9 @@ public class Args {
 
     public int getTcpPort() {
         return tcpPort;
+    }
+
+    public boolean shouldCompress() {
+        return compress;
     }
 }
