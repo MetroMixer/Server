@@ -35,6 +35,7 @@ public class SqliteManager {
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.sqlite.hibernate.dialect.SQLiteDialect");
         properties.setProperty("hibernate.connection.url", url);
+        properties.setProperty("hibernate.connection.driver_class", "org.sqlite.JDBC");
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
 
         configuration.addProperties(properties);

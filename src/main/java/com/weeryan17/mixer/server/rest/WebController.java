@@ -9,10 +9,9 @@ import com.weeryan17.mixer.server.models.PendingContainer;
 import com.weeryan17.mixer.server.models.managers.ApiManager;
 import com.weeryan17.mixer.server.models.managers.ClientManager;
 import com.weeryan17.mixer.server.utils.RandomUtils;
+import spark.Service;
 
 import java.util.stream.Collectors;
-
-import static spark.Spark.*;
 
 public class WebController {
 
@@ -24,33 +23,37 @@ public class WebController {
     private String password;
 
     public int initController() {
-        port(MixerServer.getInstance().getConfig().getTcpPort());
+        Service http = Service.ignite();
+        http.port(MixerServer.getInstance().getConfig().getTcpPort());
         if (MixerServer.getInstance().getConfig().getApiListen() != null) {
-            ipAddress(MixerServer.getInstance().getConfig().getApiListen());
+            http.ipAddress(MixerServer.getInstance().getConfig().getApiListen());
         }
-        int port = port();
         password = MixerServer.getInstance().getConfig().getApiPassword();
-        createWsRoutes();
-        createRoutes();
-        return port;
+        createWsRoutes(http);
+        createRoutes(http);
+        http.init();
+        while (http.port() == 0) {
+
+        }
+        return http.port();
     }
 
-    private void createWsRoutes() {
-        webSocket("/api", new ApiWebSocket(gson));
+    private void createWsRoutes(Service http) {
+        http.webSocket("/api", new ApiWebSocket(gson));
     }
 
-    private void createRoutes() {
-        before((req, res) -> {
+    private void createRoutes(Service http) {
+        http.before((req, res) -> {
             if (!req.pathInfo().equals("/connect")) {
                 String auth = req.headers("Auth");
                 if (auth == null) { //TODO check auth
                     JsonObject invalid = new JsonObject();
                     invalid.addProperty("error", "Key required to access this endpoint");
-                    halt(403, gson.toJson(invalid));
+                    http.halt(403, gson.toJson(invalid));
                 }
             }
         });
-        post("/connect", (req, res) -> {
+        http.post("/connect", (req, res) -> {
             if (password != null) {
                 JsonObject jsonObject = JsonParser.parseString(req.body()).getAsJsonObject();
                 String testPassword = jsonObject.get("password").getAsString();
@@ -67,17 +70,17 @@ public class WebController {
             ApiManager.getInstance().createSession(key);
             return gson.toJson(jsonObject);
         });
-        path("/devices", () -> {
-            get("/", (req, res) -> {
+        http.path("/devices", () -> {
+            http.get("/", (req, res) -> {
                 return gson.toJson(ClientManager.getInstance().getClientList());
             });
-            post("/add", (req, res) -> {
+            http.post("/add", (req, res) -> {
                 return "";
             });
-            get("/pending", (req, res) -> {
+            http.get("/pending", (req, res) -> {
                 return gson.toJson(ClientManager.getInstance().getPendingClients().stream().map(PendingContainer::getIdentifyProperties).collect(Collectors.toList()));
             });
-            post("/accept", (req, res) -> {
+            http.post("/accept", (req, res) -> {
                 JsonObject object = JsonParser.parseString(req.body()).getAsJsonObject();
                 String id = object.get("client").getAsJsonObject().get("id").getAsString();
                 PendingContainer container = ClientManager.getInstance().getPendingClients().stream()
@@ -93,7 +96,7 @@ public class WebController {
                 Client client = ClientManager.getInstance().buildClient(RandomUtils.getInstance().randomKey(), container.getIdentifyProperties());
                 return gson.toJson(client);
             });
-            delete("/disconnect", (req, res) -> {
+            http.delete("/disconnect", (req, res) -> {
                 return "";
             });
         });

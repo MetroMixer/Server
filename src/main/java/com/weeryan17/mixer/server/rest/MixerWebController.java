@@ -2,8 +2,7 @@ package com.weeryan17.mixer.server.rest;
 
 import com.google.gson.Gson;
 import com.weeryan17.mixer.server.MixerServer;
-
-import static spark.Spark.*;
+import spark.Service;
 
 public class MixerWebController {
 
@@ -13,17 +12,24 @@ public class MixerWebController {
     }
 
     public int initController() {
-        port(MixerServer.getInstance().getConfig().getAudioTcpPort());
+        Service http = Service.ignite();
+        http.port(MixerServer.getInstance().getConfig().getAudioTcpPort());
         if (MixerServer.getInstance().getConfig().getAudioListen() != null) {
-            ipAddress(MixerServer.getInstance().getConfig().getAudioListen());
+            http.ipAddress(MixerServer.getInstance().getConfig().getAudioListen());
         }
-        int port = port();
-        createWsRoutes();
-        return port;
+        createWsRoutes(http);
+        http.get("/dummy", (req, res) -> {
+            return "";
+        });
+        http.init();
+        while (http.port() == 0) {
+
+        }
+        return http.port();
     }
 
-    public void createWsRoutes() {
-        webSocket("/", new MixerWebSocket(gson));
+    public void createWsRoutes(Service http) {
+        http.webSocket("/", new MixerWebSocket(gson));
     }
 
 }

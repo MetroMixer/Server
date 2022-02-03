@@ -38,10 +38,12 @@ public class BroadcastSocketRunnable implements Runnable {
             }
             byte[] data = receive.getData();
             String ip = receive.getAddress().getHostAddress();
+            String jsonStr = new String(data, StandardCharsets.UTF_8).trim();
             JsonObject object;
             try {
-                object = JsonParser.parseString(new String(data, StandardCharsets.UTF_8)).getAsJsonObject();
+                object = JsonParser.parseString(jsonStr).getAsJsonObject();
             } catch (JsonParseException e) {
+                e.printStackTrace();
                 //TODO log
                 continue;
             }

@@ -54,9 +54,9 @@ public class MixerServer {
 
     private long broadCastThreadId;
     private long audioThreadId;
-    private int audioUdpPort;
-    private int audioTcpPort;
-    private int tcpPort;
+    private int audioUdpPort = 1;
+    private int audioTcpPort = 1;
+    private int tcpPort = 1;
     private SqliteManager sqliteManager;
 
     public void init(String... args) throws Exception {
