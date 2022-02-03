@@ -10,7 +10,6 @@ public class RandomUtils {
 
     public String randomKey() {
         long time = System.currentTimeMillis();
-        List<Integer> timeNums = new ArrayList<>();
 
         StringBuilder part1 = new StringBuilder();
         while (time > 0) {
@@ -18,7 +17,7 @@ public class RandomUtils {
             part1.append(allowedChars[num*2]);
             time /= 10L;
         }
-        String part2 = randomString(20);
+        String part2 = randomString(30);
         return part1 + "." + part2;
     }
 

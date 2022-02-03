@@ -1,7 +1,9 @@
 package com.weeryan17.mixer.server;
 
+import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.weeryan17.mixer.server.rest.MixerWebController;
 import com.weeryan17.mixer.server.rest.WebController;
 import com.weeryan17.mixer.server.socket.audio.AudioConnectSocketRunnable;
 import com.weeryan17.mixer.server.socket.BroadcastSocketRunnable;
@@ -9,9 +11,22 @@ import com.weeryan17.mixer.shared.models.Version;
 import com.weeryan17.rudp.ReliableServerSocket;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.jaudiolibs.jnajack.Jack;
+import org.jaudiolibs.jnajack.JackClient;
+import org.jaudiolibs.jnajack.JackOptions;
+import org.jaudiolibs.jnajack.JackPort;
+import org.jaudiolibs.jnajack.JackPortFlags;
+import org.jaudiolibs.jnajack.JackPortType;
+import org.jaudiolibs.jnajack.JackProcessCallback;
+import org.jaudiolibs.jnajack.JackStatus;
+import org.simpleyaml.configuration.file.FileConfiguration;
+import org.simpleyaml.configuration.file.YamlConfiguration;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.FloatBuffer;
+import java.util.EnumSet;
 import java.util.Properties;
 import java.util.Timer;
 
@@ -22,6 +37,10 @@ public class MixerServer {
     private Version serverVersion;
     private final Version audioVersion = new Version(1, 0, 0);
     private final Version apiVersion = new Version(1, 0, 0);
+
+    private Config config;
+
+    private Jack jack;
 
     public static void main(String... args) {
         try {
@@ -34,19 +53,36 @@ public class MixerServer {
 
     private long broadCastThreadId;
     private long audioThreadId;
-    private int udpPort;
+    private int audioUdpPort;
+    private int audioTcpPort;
     private int tcpPort;
 
     public void init(String... args) throws Exception {
+        Args argObj = new Args();
+        JCommander jCommander = JCommander.newBuilder().addObject(argObj).build();
+        jCommander.parse(args);
+
+        if (argObj.isHelp()) {
+            jCommander.usage();
+            return;
+        }
+
+        config = new Config(argObj);
+
         Properties properties = new Properties();
         properties.load(getClass().getClassLoader().getResourceAsStream("version.properties"));
         serverVersion = Version.fromString(properties.getProperty("server.version"));
         Gson gson = new GsonBuilder().registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory()).create();
 
-        DatagramSocket broadcastSocket = new DatagramSocket(10255);
+        DatagramSocket broadcastSocket = new DatagramSocket(config.getBroadcastPort());
         broadcastSocket.setBroadcast(true);
-        ReliableServerSocket audioServerSocket = new ReliableServerSocket(0);
-        udpPort = audioServerSocket.getLocalPort();
+        ReliableServerSocket audioServerSocket;
+        if (config.getAudioListen() != null) {
+            audioServerSocket = new ReliableServerSocket(config.getAudioUdpPort(), 0, InetAddress.getByName(config.getAudioListen()));
+        } else {
+            audioServerSocket = new ReliableServerSocket(config.getAudioUdpPort());
+        }
+        audioUdpPort = audioServerSocket.getLocalPort();
 
         Thread broadcastThread = new Thread(new BroadcastSocketRunnable(broadcastSocket, gson), "broadcastThread");
         broadcastThread.start();
@@ -59,10 +95,13 @@ public class MixerServer {
         Timer timer = new Timer();
         timer.schedule(new HeartBeatTask(), 1000, 500);
 
+        MixerWebController mixerWebController = new MixerWebController(gson);
+        audioTcpPort = mixerWebController.initController();
+
         WebController webController = new WebController(gson);
         tcpPort = webController.initController();
 
-        Jack jack = Jack.getInstance();
+        jack = Jack.getInstance();
 
         /*JackClient client = jack.openClient("java-test", EnumSet.noneOf(JackOptions.class), EnumSet.noneOf(JackStatus.class));
         JackPort in1 = client.registerPort("test-1", JackPortType.AUDIO, EnumSet.of(JackPortFlags.JackPortIsInput));
@@ -72,19 +111,27 @@ public class MixerServer {
         client.setProcessCallback(new JackProcessCallback() {
             @Override
             public boolean process(JackClient client, int nframes) {
-                FloatBuffer floatBuffer = FloatBuffer.wrap()
                 out1.getFloatBuffer().put(in1.getFloatBuffer());
-                return false;
+                out2.getFloatBuffer().put(in2.getFloatBuffer());
+                return true;
             }
         });*/
     }
 
-    public int getUdpPort() {
-        return udpPort;
+    public int getAudioUdpPort() {
+        return audioUdpPort;
+    }
+
+    public int getAudioTcpPort() {
+        return audioTcpPort;
     }
 
     public int getTcpPort() {
         return tcpPort;
+    }
+
+    public Config getConfig() {
+        return config;
     }
 
     public static MixerServer getInstance() {

@@ -1,4 +1,4 @@
-package com.weeryan17.mixer.server.data;
+package com.weeryan17.mixer.server.data.managers;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -23,6 +23,7 @@ public class SqliteManager {
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.sqlite.hibernate.dialect.SQLiteDialect");
         properties.setProperty("hibernate.connection.url", url);
+        properties.setProperty("hibernate.hbm2ddl.auto", "update");
 
         configuration.addProperties(properties);
         sessionFactory = configuration.buildSessionFactory();

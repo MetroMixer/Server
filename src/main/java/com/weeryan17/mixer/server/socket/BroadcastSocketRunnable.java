@@ -57,18 +57,13 @@ public class BroadcastSocketRunnable implements Runnable {
                 String thisAddress = socket.getLocalAddress().getHostAddress();
                 JsonObject toSend = new JsonObject();
                 toSend.addProperty("ip", thisAddress);
-                toSend.addProperty("port", MixerServer.getInstance().getTcpPort());
+                toSend.addProperty("audio_port", MixerServer.getInstance().getAudioTcpPort());
+                toSend.addProperty("api_port", MixerServer.getInstance().getTcpPort());
                 socket.getOutputStream().write(gson.toJson(toSend).getBytes(StandardCharsets.UTF_8));
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            /*try {
-                ClientManager.getInstance().buildClient(ip, port);
-            } catch (IOException e) {
-                //TODO log
-                e.printStackTrace();
-            }*/
         }
     }
 

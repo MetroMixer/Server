@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.weeryan17.mixer.server.MixerServer;
+import com.weeryan17.mixer.server.commandmeta.CommandList;
 import com.weeryan17.mixer.server.models.Client;
 import com.weeryan17.mixer.server.models.builder.ClientManager;
+import com.weeryan17.mixer.shared.command.data.Init;
+import com.weeryan17.mixer.shared.command.data.Invalid;
 import com.weeryan17.mixer.shared.command.data.VersionProperties;
 import com.weeryan17.mixer.shared.command.meta.CommandData;
 import com.weeryan17.mixer.shared.command.meta.CommandType;
@@ -16,6 +19,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 @WebSocket
 public class MixerWebSocket {
@@ -28,23 +32,24 @@ public class MixerWebSocket {
     @OnWebSocketConnect
     public void connected(Session session) throws IOException {
         String key = session.getUpgradeRequest().getHeader("key");
-        if (key == null) {
-            // new client
-            return;
-        }
         Client client = ClientManager.getInstance().getClientWithKey(key);
-        if (client == null) {
-            session.close();
-            return;
+        sendCommand(session, CommandType.VERSION, new VersionProperties(MixerServer.getInstance().getServerVersion(), MixerServer.getInstance().getAudioVersion(), MixerServer.getInstance().getApiVersion()));
+        if (client == null && key != null) {
+            sendCommand(session, CommandType.INVALID, new Invalid(1, "Key is not valid", false));
         }
-        sendCommand(session, "version", new VersionProperties(MixerServer.getInstance().getServerVersion(), MixerServer.getInstance().getAudioVersion(), MixerServer.getInstance().getApiVersion()));
-        client.setSession(session);
+        if (client != null) {
+            sendCommand(session, CommandType.INIT, new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort()));
+            client.setSession(session);
+            client.updateLastBeatTime();
+        }
     }
 
     @OnWebSocketClose
     public void closed(Session session, int statusCode, String reason) {
         Client client = ClientManager.getInstance().getClientWithSession(session);
-        client.shutdown();
+        if (client != null) {
+            client.shutdown();
+        }
     }
 
     @OnWebSocketMessage
@@ -57,11 +62,20 @@ public class MixerWebSocket {
         if (client == null && !commandStr.equals("identify")) {
             return;
         }
+
+        try {
+            CommandList.getByCommand(commandStr).createCommand().runCommand(this, session, client, commandData);
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void sendCommand(Session session, String command, CommandData data) throws IOException {
+    public void sendCommand(Session session, CommandType command, CommandData data) throws IOException {
+        if (!command.getJavaClass().equals(data.getClass())) {
+            throw new IllegalArgumentException("Data type does not match command type");
+        }
         JsonObject send = new JsonObject();
-        send.addProperty("command", command);
+        send.addProperty("command", command.getCommand());
         send.add("data", gson.toJsonTree(data));
         session.getRemote().sendString(gson.toJson(send));
     }

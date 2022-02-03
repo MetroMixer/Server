@@ -8,7 +8,7 @@ import java.util.TimerTask;
 
 public class HeartBeatTask extends TimerTask {
 
-    private long leway = 1000;
+    private long leway = 1000; //TODO make config/args option
 
     @Override
     public void run() {
@@ -20,6 +20,7 @@ public class HeartBeatTask extends TimerTask {
                 client.shutdown();
             }
         }
+        //TODO basically the same code but for api
     }
 
 }
