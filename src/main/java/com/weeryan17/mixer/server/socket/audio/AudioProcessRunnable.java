@@ -1,7 +1,7 @@
 package com.weeryan17.mixer.server.socket.audio;
 
 import com.weeryan17.mixer.server.models.Client;
-import com.weeryan17.mixer.server.models.builder.ClientManager;
+import com.weeryan17.mixer.server.models.managers.ClientManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

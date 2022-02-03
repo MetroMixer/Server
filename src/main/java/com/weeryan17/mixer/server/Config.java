@@ -26,6 +26,9 @@ public class Config {
     private int audioTcpPort;
     private int tcpPort;
     private boolean compress;
+    private long leeway;
+
+    private String apiPassword;
 
     public void init() {
         FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(new File(commandLineArgs.getConfigFile()));
@@ -35,6 +38,7 @@ public class Config {
         maxAudioQueueSize = fileConfiguration.getInt("audio.queue", commandLineArgs.getMaxAudioQueueSize());
         audioHeartbeat = fileConfiguration.getLong("heartbeat.audio", commandLineArgs.getAudioHeartbeat());
         apiHeartbeat = fileConfiguration.getLong("heartbeat.api", commandLineArgs.getApiHeartbeat());
+        leeway = fileConfiguration.getLong("heartbeat.leeway", commandLineArgs.getLeeway());
         broadcastPort = fileConfiguration.getInt("net.broadcast", commandLineArgs.getBroadcastPort());
         audioListen = fileConfiguration.getString("net.audio.listen", null);
         audioUdpPort = fileConfiguration.getInt("net.audio.udp", commandLineArgs.getAudioUdpPort());
@@ -42,6 +46,7 @@ public class Config {
         apiListen = fileConfiguration.getString("net.api.listen", null);
         tcpPort = fileConfiguration.getInt("net.api.port", commandLineArgs.getTcpPort());
         compress = fileConfiguration.getBoolean("audio.compress", commandLineArgs.shouldCompress());
+        apiPassword = fileConfiguration.getString("net.api.password");
 
     }
 
@@ -91,5 +96,13 @@ public class Config {
 
     public boolean shouldCompress() {
         return compress;
+    }
+
+    public long getLeeway() {
+        return leeway;
+    }
+
+    public String getApiPassword() {
+        return apiPassword;
     }
 }

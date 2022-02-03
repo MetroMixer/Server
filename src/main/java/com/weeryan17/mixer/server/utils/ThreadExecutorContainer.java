@@ -12,9 +12,9 @@ public class ThreadExecutorContainer {
     private final AtomicLong threadCounter = new AtomicLong(0);
     private final ExecutorService pool;
 
-    public ThreadExecutorContainer(String name) {
+    public ThreadExecutorContainer(String name, int maxPool) {
         threadGroup = new ThreadGroup(name);
-        pool = new ThreadPoolExecutor(10, 50, 1000L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), r -> new Thread(threadGroup, r, name + "-" + threadCounter.incrementAndGet()));
+        pool = new ThreadPoolExecutor(5, maxPool, 1000L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), r -> new Thread(threadGroup, r, name + "-" + threadCounter.incrementAndGet()));
     }
 
     public void queueThread(Runnable runnable) {

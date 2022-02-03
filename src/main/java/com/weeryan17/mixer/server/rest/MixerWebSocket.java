@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import com.weeryan17.mixer.server.MixerServer;
 import com.weeryan17.mixer.server.commandmeta.CommandList;
 import com.weeryan17.mixer.server.models.Client;
-import com.weeryan17.mixer.server.models.builder.ClientManager;
+import com.weeryan17.mixer.server.models.managers.ClientManager;
 import com.weeryan17.mixer.shared.command.data.Init;
 import com.weeryan17.mixer.shared.command.data.Invalid;
 import com.weeryan17.mixer.shared.command.data.VersionProperties;
@@ -60,6 +60,7 @@ public class MixerWebSocket {
 
         Client client = ClientManager.getInstance().getClientWithSession(session);
         if (client == null && !commandStr.equals("identify")) {
+            session.close();
             return;
         }
 

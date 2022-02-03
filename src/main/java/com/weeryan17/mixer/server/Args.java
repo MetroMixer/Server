@@ -27,6 +27,8 @@ public class Args {
     private boolean help;
     @Parameter(names = {"-c", "--compress"}, description = "Sets weather to compress the audio when sending to a client or not.")
     private boolean compress = true;
+    @Parameter(names = {"-l", "--leeway"}, description = "Sets heartbeat leeway in milliseconds")
+    private long leeway = 1000;
 
     public String getConfigFile() {
         return configFile;
@@ -74,5 +76,9 @@ public class Args {
 
     public boolean shouldCompress() {
         return compress;
+    }
+
+    public long getLeeway() {
+        return leeway;
     }
 }

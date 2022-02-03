@@ -1,4 +1,4 @@
-package com.weeryan17.mixer.server.models.builder;
+package com.weeryan17.mixer.server.models.managers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,7 +12,6 @@ import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jaudiolibs.jnajack.JackException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +20,12 @@ public class ClientManager {
     private List<Client> clientList = new ArrayList<>();
     private List<PendingContainer> pendingClients = new ArrayList<>();
 
-    private final ThreadExecutorContainer sendContainer = new ThreadExecutorContainer("AudioSendProcess");
+    private final ThreadExecutorContainer sendContainer;
 
     private Gson gson;
     private long heartbeat;
     public ClientManager(Gson gson, long heartbeat) {
+        sendContainer = new ThreadExecutorContainer("AudioSendProcess", 50);
         this.gson = gson;
         this.heartbeat = heartbeat;
     }

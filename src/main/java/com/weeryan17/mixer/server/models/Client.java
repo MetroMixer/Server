@@ -71,7 +71,7 @@ public class Client {
         return beatInterval;
     }
 
-    private Session session;
+    private transient Session session;
     private String key;
     private long lastBeatTime = -1;
 

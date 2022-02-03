@@ -1,7 +1,8 @@
 package com.weeryan17.mixer.server.socket.audio;
 
+import com.weeryan17.mixer.server.MixerServer;
 import com.weeryan17.mixer.server.models.Client;
-import com.weeryan17.mixer.server.models.builder.ClientManager;
+import com.weeryan17.mixer.server.models.managers.ClientManager;
 import com.weeryan17.mixer.server.utils.ThreadExecutorContainer;
 import com.weeryan17.rudp.ReliableServerSocket;
 import com.weeryan17.rudp.ReliableSocket;
@@ -13,11 +14,13 @@ import java.nio.charset.StandardCharsets;
 
 public class AudioConnectSocketRunnable implements Runnable {
 
-    private final ThreadExecutorContainer connectionContainer = new ThreadExecutorContainer("AudioConnections");
-    private final ThreadExecutorContainer processContainer = new ThreadExecutorContainer("AudioSocketProcess");
+    private final ThreadExecutorContainer connectionContainer;
+    private final ThreadExecutorContainer processContainer;
 
     private ReliableServerSocket reliableServerSocket;
     public AudioConnectSocketRunnable(ReliableServerSocket reliableServerSocket) {
+        connectionContainer = new ThreadExecutorContainer("AudioConnections", MixerServer.getInstance().getConfig().getMaxConnectThreads());
+        processContainer = new ThreadExecutorContainer("AudioSocketProcess", MixerServer.getInstance().getConfig().getMaxReceiveThreads());
         this.reliableServerSocket = reliableServerSocket;
     }
 

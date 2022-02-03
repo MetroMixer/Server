@@ -4,7 +4,7 @@ import com.weeryan17.mixer.server.MixerServer;
 import com.weeryan17.mixer.server.commandmeta.Command;
 import com.weeryan17.mixer.server.models.Client;
 import com.weeryan17.mixer.server.models.PendingContainer;
-import com.weeryan17.mixer.server.models.builder.ClientManager;
+import com.weeryan17.mixer.server.models.managers.ClientManager;
 import com.weeryan17.mixer.server.rest.MixerWebSocket;
 import com.weeryan17.mixer.server.utils.RandomUtils;
 import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
