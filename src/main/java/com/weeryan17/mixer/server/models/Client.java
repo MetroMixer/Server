@@ -60,10 +60,11 @@ public class Client {
         JackPort port = jackClient.registerPort(name, JackPortType.AUDIO, EnumSet.of(type.equals(ChannelType.IN) ? JackPortFlags.JackPortIsOutput : JackPortFlags.JackPortIsInput));
         if (type.equals(ChannelType.IN)) {
             inputs.add(port);
+            return inputs.indexOf(port);
         } else {
             outputs.add(port);
+            return outputs.indexOf(port);
         }
-        return 0;
     }
 
     public long getBeatInterval() {
