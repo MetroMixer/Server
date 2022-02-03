@@ -130,6 +130,10 @@ public class MixerServer {
         return tcpPort;
     }
 
+    public Jack getJack() {
+        return jack;
+    }
+
     public Config getConfig() {
         return config;
     }

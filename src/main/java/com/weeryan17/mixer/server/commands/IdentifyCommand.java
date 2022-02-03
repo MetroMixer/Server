@@ -11,6 +11,7 @@ import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
 import com.weeryan17.mixer.shared.command.data.Init;
 import com.weeryan17.mixer.shared.command.meta.CommandType;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jaudiolibs.jnajack.JackException;
 
 import java.io.IOException;
 
@@ -21,7 +22,13 @@ public class IdentifyCommand implements Command<IdentifyProperties> {
         if (client == null) {
             PendingContainer pendingContainer = new PendingContainer(data, accepted -> {
                 String key = RandomUtils.getInstance().randomKey();
-                Client acceptedClient = ClientManager.getInstance().buildClient(key, data);
+                Client acceptedClient = null;
+                try {
+                    acceptedClient = ClientManager.getInstance().buildClient(key, data);
+                } catch (JackException e) {
+                    e.printStackTrace();
+                    return e;
+                }
                 acceptedClient.setSession(session);
                 acceptedClient.updateLastBeatTime();
                 Init init = new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort(), key);

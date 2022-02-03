@@ -8,6 +8,7 @@ import com.weeryan17.mixer.server.models.PendingContainer;
 import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jaudiolibs.jnajack.JackException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class ClientManager {
         this.heartbeat = heartbeat;
     }
 
-    public Client buildClient(String key, IdentifyProperties id) {
+    public Client buildClient(String key, IdentifyProperties id) throws JackException {
         Client client = new Client(gson, id, heartbeat);
         client.setKey(key);
         clientList.add(client);
