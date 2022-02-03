@@ -1,9 +1,14 @@
 package com.weeryan17.mixer.server.data.managers;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.reflections.Reflections;
 
+import javax.persistence.Entity;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class SqliteManager {
 
@@ -20,6 +25,13 @@ public class SqliteManager {
 
         Configuration configuration = new Configuration();
 
+        Reflections reflections = new Reflections("com.weeryan17.mixer.server.data.entities");
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Entity.class);
+
+        for (Class<?> clas : classes) {
+            configuration.addAnnotatedClass(clas);
+        }
+
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.sqlite.hibernate.dialect.SQLiteDialect");
         properties.setProperty("hibernate.connection.url", url);
@@ -27,6 +39,19 @@ public class SqliteManager {
 
         configuration.addProperties(properties);
         sessionFactory = configuration.buildSessionFactory();
+    }
+
+    public void transaction(Consumer<Session> consumer) {
+        try (Session session = sessionFactory.openSession()) {
+            session.getTransaction().begin();
+            try {
+                consumer.accept(session);
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                return;
+            }
+            session.getTransaction().commit();
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.weeryan17.mixer.server;
 import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.weeryan17.mixer.server.data.managers.SqliteManager;
 import com.weeryan17.mixer.server.rest.MixerWebController;
 import com.weeryan17.mixer.server.rest.WebController;
 import com.weeryan17.mixer.server.socket.audio.AudioConnectSocketRunnable;
@@ -56,6 +57,7 @@ public class MixerServer {
     private int audioUdpPort;
     private int audioTcpPort;
     private int tcpPort;
+    private SqliteManager sqliteManager;
 
     public void init(String... args) throws Exception {
         Args argObj = new Args();
@@ -68,6 +70,8 @@ public class MixerServer {
         }
 
         config = new Config(argObj);
+
+        sqliteManager = new SqliteManager("data.db");
 
         Properties properties = new Properties();
         properties.load(getClass().getClassLoader().getResourceAsStream("version.properties"));
@@ -136,6 +140,10 @@ public class MixerServer {
 
     public Config getConfig() {
         return config;
+    }
+
+    public SqliteManager getSqliteManager() {
+        return sqliteManager;
     }
 
     public static MixerServer getInstance() {

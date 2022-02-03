@@ -3,6 +3,7 @@ package com.weeryan17.mixer.server.models.builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.weeryan17.mixer.server.MixerServer;
+import com.weeryan17.mixer.server.data.entities.ApprovedClient;
 import com.weeryan17.mixer.server.models.Client;
 import com.weeryan17.mixer.server.models.PendingContainer;
 import com.weeryan17.mixer.server.utils.ThreadExecutorContainer;
@@ -34,6 +35,10 @@ public class ClientManager {
         client.setKey(key);
         clientList.add(client);
         pendingClients.remove(pendingClients.stream().filter(pendingContainer -> pendingContainer.getIdentifyProperties().equals(id)).findFirst().orElse(null));
+        MixerServer.getInstance().getSqliteManager().transaction(session -> {
+            ApprovedClient approvedClient = new ApprovedClient(key);
+            session.save(approvedClient);
+        });
         return client;
     }
 

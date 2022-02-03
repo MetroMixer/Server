@@ -1,4 +1,4 @@
-package com.weeryan17.mixer.server.data;
+package com.weeryan17.mixer.server.data.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,4 +19,19 @@ public class ApprovedClient {
     @Column
     private String key;
 
+    public ApprovedClient(String key) {
+        this.key = key;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
 }
