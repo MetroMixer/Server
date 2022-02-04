@@ -22,11 +22,11 @@ public class CreateChannelsCommand implements Command<CreateChannels> {
             } catch (JackException e) {
                 e.printStackTrace();
             }
-            try {
-                mixerWebSocket.sendCommand(session, CommandType.CREATE_CHANNELS, data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        }
+        try {
+            mixerWebSocket.sendCommand(session, CommandType.CREATE_CHANNELS, data);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

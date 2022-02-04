@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class AudioProcessRunnable implements Runnable {
@@ -31,13 +33,15 @@ public class AudioProcessRunnable implements Runnable {
         } catch (IOException ignored) {}
         ByteBuffer buffer = ByteBuffer.wrap(audio);
         int channels = buffer.getInt();
+        List<FloatBuffer> floatBuffers = new ArrayList<>();
         for (int channel = 0; channel < channels; channel++) {
             int floats = buffer.getInt();
             FloatBuffer floatBuffer = FloatBuffer.allocate(floats);
             for (int i = 0; i < floats; i++) {
                 floatBuffer.put(buffer.getFloat());
             }
-            //TODO put float buffer in out port
+            floatBuffers.add(floatBuffer);
         }
+        client.addToQueue(floatBuffers);
     }
 }

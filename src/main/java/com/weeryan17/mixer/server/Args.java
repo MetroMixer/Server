@@ -28,7 +28,7 @@ public class Args {
     @Parameter(names = {"-c", "--compress"}, description = "Sets weather to compress the audio when sending to a client or not.")
     private boolean compress = true;
     @Parameter(names = {"-l", "--leeway"}, description = "Sets heartbeat leeway in milliseconds")
-    private long leeway = 1000;
+    private long leeway = 3000;
 
     public String getConfigFile() {
         return configFile;

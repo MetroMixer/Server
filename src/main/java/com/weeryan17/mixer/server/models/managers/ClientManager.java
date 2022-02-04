@@ -14,11 +14,12 @@ import org.jaudiolibs.jnajack.JackException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClientManager {
 
-    private List<Client> clientList = new ArrayList<>();
-    private List<PendingContainer> pendingClients = new ArrayList<>();
+    private List<Client> clientList = new CopyOnWriteArrayList<>();
+    private List<PendingContainer> pendingClients = new CopyOnWriteArrayList<>();
 
     private final ThreadExecutorContainer sendContainer;
 

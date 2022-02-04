@@ -93,8 +93,10 @@ public class WebController {
                     return gson.toJson(invalid);
                 }
 
-                Client client = ClientManager.getInstance().buildClient(RandomUtils.getInstance().randomKey(), container.getIdentifyProperties());
-                return gson.toJson(client);
+                container.getAcceptConsumer().apply(true);
+
+                //Client client = ClientManager.getInstance().buildClient(RandomUtils.getInstance().randomKey(), container.getIdentifyProperties());
+                return "true";
             });
             http.delete("/disconnect", (req, res) -> {
                 return "";

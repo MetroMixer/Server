@@ -21,6 +21,9 @@ public class IdentifyCommand implements Command<IdentifyProperties> {
     public void runCommand(MixerWebSocket mixerWebSocket, Session session, Client client, IdentifyProperties data) {
         if (client == null) {
             PendingContainer pendingContainer = new PendingContainer(data, accepted -> {
+                if (!accepted) {
+                    return null;
+                }
                 String key = RandomUtils.getInstance().randomKey();
                 Client acceptedClient = null;
                 try {

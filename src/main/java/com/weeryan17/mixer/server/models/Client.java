@@ -53,6 +53,11 @@ public class Client {
         this.sendContainer = sendContainer;
         jackClient = MixerServer.getInstance().getJack().openClient(id.getId(), EnumSet.noneOf(JackOptions.class), EnumSet.noneOf(JackStatus.class));
         jackClient.setProcessCallback(new Processor(this));
+        jackClient.activate();
+    }
+
+    public void addToQueue(List<FloatBuffer> floatBuffers) {
+        floatBuffersQueue.add(floatBuffers);
     }
 
     public int createChannel(String name, ChannelType type) throws JackException {
@@ -105,6 +110,8 @@ public class Client {
 
     public void shutdown() {
         session = null;
+        jackClient.deactivate();
+        jackClient.close();
     }
 
     public Socket getSocket() {
@@ -134,9 +141,13 @@ public class Client {
             int size = 0;
             for (JackPort port : outputs) {
                 FloatBuffer fBuffer = port.getFloatBuffer();
-                ByteBuffer buffer = ByteBuffer.allocate((fBuffer.array().length * 4) + 4);
-                buffer.putInt(fBuffer.array().length);
-                for (float f : fBuffer.array()) {
+                if (fBuffer == null) {
+                    continue;
+                }
+                ByteBuffer buffer = ByteBuffer.allocate((fBuffer.remaining() * 4) + 4);
+                buffer.putInt(fBuffer.remaining());
+                while (fBuffer.hasRemaining()) {
+                    float f = fBuffer.get();
                     buffer.putFloat(f);
                 }
                 toSend.add(buffer);

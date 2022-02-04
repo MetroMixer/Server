@@ -56,13 +56,19 @@ public class MixerWebSocket {
     public void message(Session session, String message) throws IOException {
         JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
         String commandStr = jsonObject.get("command").getAsString();
-        CommandData commandData = gson.fromJson(jsonObject.get("data").getAsJsonObject(), CommandType.getByCommand(commandStr).getJavaClass());
 
         Client client = ClientManager.getInstance().getClientWithSession(session);
         if (client == null && !commandStr.equals("identify")) {
             session.close();
             return;
         }
+
+        if (commandStr.equals("heartbeat")) {
+            client.updateLastBeatTime();
+            return;
+        }
+
+        CommandData commandData = gson.fromJson(jsonObject.get("data").getAsJsonObject(), CommandType.getByCommand(commandStr).getJavaClass());
 
         try {
             CommandList.getByCommand(commandStr).createCommand().runCommand(this, session, client, commandData);

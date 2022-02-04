@@ -25,6 +25,7 @@ public class HeartBeatTask extends TimerTask {
                 long check = client.getLastBeatTime() + client.getBeatInterval() + leeway;
                 if (time > check) {
                     client.shutdown();
+                    ClientManager.getInstance().getClientList().remove(client);
                     //TODO log, and attempt to send shutdown message
                 }
             }
