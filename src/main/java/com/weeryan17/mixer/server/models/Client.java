@@ -150,6 +150,7 @@ public class Client {
                     float f = fBuffer.get();
                     buffer.putFloat(f);
                 }
+                buffer.rewind();
                 toSend.add(buffer);
                 size += buffer.array().length;
             }
@@ -159,7 +160,10 @@ public class Client {
                 for (ByteBuffer buffer : toSend) {
                     send.put(buffer);
                 }
-                sendContainer.queueThread(new AudioSendRunnable(this.client, send.array()));
+                send.rewind();
+                byte[] audio = new byte[send.remaining()];
+                send.get(audio);
+                sendContainer.queueThread(new AudioSendRunnable(this.client, audio));
             }
 
             return true;
