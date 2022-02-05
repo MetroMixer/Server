@@ -10,7 +10,7 @@ public class Args {
     @Parameter(names = {"-ct", "--connect-threads"}, description = "Maximum number of threads to create for audio devices connecting. Note this isn't the number of devices that can connect, just how many the program can handle connecting at the same time")
     private int maxConnectThreads = 5;
     @Parameter(names = {"-q", "--queue-size"}, description = "Maximum length the audio queue can reach before it starts discarding audio. The bigger this number is the longer your audio can possibly be delayed, but the less audio that can potentially be discarded")
-    private int maxAudioQueueSize = 5;
+    private int maxAudioQueueSize = 1;
     @Parameter(names = {"-aub", "--audio-heartbeat"}, description = "The heartbeat interval in milliseconds for audio clients")
     private long audioHeartbeat = 15000;
     @Parameter(names = {"-apb", "--api-heartbeat"}, description = "The heartbeat interval in milliseconds for the api")

@@ -1,6 +1,7 @@
 package com.weeryan17.mixer.server.socket.audio;
 
 import com.weeryan17.mixer.server.models.Client;
+import com.weeryan17.mixer.server.models.QueueItem;
 import com.weeryan17.mixer.server.models.managers.ClientManager;
 
 import java.io.ByteArrayInputStream;
@@ -15,13 +16,15 @@ public class AudioProcessRunnable implements Runnable {
 
     private final byte[] audio;
     private final Client client;
-    public AudioProcessRunnable(byte[] audio, String key) {
+    private final long start;
+    public AudioProcessRunnable(byte[] audio, String key, long start) {
         Client client = ClientManager.getInstance().getClientWithKey(key);
         if (client == null) {
             throw new UnsupportedOperationException("Key not valid");
         }
         this.client = client;
         this.audio = audio;
+        this.start = start;
     }
 
     @Override
@@ -44,7 +47,10 @@ public class AudioProcessRunnable implements Runnable {
             floatBuffer.rewind();
             floatBuffers.add(floatBuffer);
         }
-        client.addToQueue(floatBuffers);
+        client.addToQueue(new QueueItem(floatBuffers, start));
+        /*long end = System.currentTimeMillis();
+        long process = end - start;
+        System.out.println("It took " + process + "ms to process audio");*/
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

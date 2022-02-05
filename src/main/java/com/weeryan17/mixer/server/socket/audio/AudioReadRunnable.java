@@ -33,7 +33,7 @@ public class AudioReadRunnable implements Runnable {
             try {
                 int len = ByteBuffer.wrap(in.readNBytes(4)).getInt();
                 byte[] data = in.readNBytes(len);
-                threadExecutorContainer.queueThread(new AudioProcessRunnable(data, key));
+                threadExecutorContainer.queueThread(new AudioProcessRunnable(data, key, System.currentTimeMillis()));
             } catch (IOException e) {
                 e.printStackTrace();
                 return;

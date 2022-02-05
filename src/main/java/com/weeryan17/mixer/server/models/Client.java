@@ -36,7 +36,7 @@ public class Client {
     private transient List<JackPort> inputs = new ArrayList<>();
     private transient List<JackPort> outputs = new ArrayList<>();
 
-    private transient Queue<List<FloatBuffer>> floatBuffersQueue = EvictingQueue.create(MixerServer.getInstance().getConfig().getMaxAudioQueueSize());
+    private transient Queue<QueueItem> floatBuffersQueue = EvictingQueue.create(MixerServer.getInstance().getConfig().getMaxAudioQueueSize());
 
     private transient Socket socket;
 
@@ -56,8 +56,8 @@ public class Client {
         jackClient.activate();
     }
 
-    public void addToQueue(List<FloatBuffer> floatBuffers) {
-        floatBuffersQueue.add(floatBuffers);
+    public void addToQueue(QueueItem queueItem) {
+        floatBuffersQueue.add(queueItem);
     }
 
     public int createChannel(String name, ChannelType type) throws JackException {
@@ -131,11 +131,15 @@ public class Client {
 
         @Override
         public boolean process(JackClient client, int nframes) {
-            List<FloatBuffer> floatBuffers = floatBuffersQueue.poll();
-            if (floatBuffers != null) {
+            QueueItem queueItem = floatBuffersQueue.poll();
+            if (queueItem != null) {
+                List<FloatBuffer> floatBuffers = queueItem.getFloatBuffers();
                 for (int i = 0; i < inputs.size(); i++) {
                     inputs.get(i).getFloatBuffer().put(floatBuffers.get(i));
                 }
+                long time = System.currentTimeMillis();
+                long took = time - queueItem.getStartTime();
+                System.out.println("Audio took " + took + "ms to be sent to jack");
             }
             List<ByteBuffer> toSend = new ArrayList<>();
             int size = 0;
