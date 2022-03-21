@@ -7,7 +7,6 @@ import com.weeryan17.mixer.server.socket.audio.AudioSendRunnable;
 import com.weeryan17.mixer.server.utils.ThreadExecutorContainer;
 import com.weeryan17.mixer.shared.command.data.IdentifyProperties;
 import com.weeryan17.mixer.shared.models.ChannelType;
-import com.weeryan17.rudp.ReliableServerSocket;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jaudiolibs.jnajack.JackClient;
 import org.jaudiolibs.jnajack.JackException;
@@ -23,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -36,7 +34,7 @@ public class Client {
     private transient List<JackPort> inputs = new ArrayList<>();
     private transient List<JackPort> outputs = new ArrayList<>();
 
-    private transient Queue<QueueItem> floatBuffersQueue = EvictingQueue.create(MixerServer.getInstance().getConfig().getMaxAudioQueueSize());
+    private transient Queue<QueueItem> floatBuffersQueue = EvictingQueue.create(1050);
 
     private transient Socket socket;
 
@@ -125,21 +123,30 @@ public class Client {
     private class Processor implements JackProcessCallback {
 
         private Client client;
+
         private Processor(Client client) {
             this.client = client;
         }
 
         @Override
         public boolean process(JackClient client, int nframes) {
-            QueueItem queueItem = floatBuffersQueue.poll();
-            if (queueItem != null) {
-                List<FloatBuffer> floatBuffers = queueItem.getFloatBuffers();
+            if (floatBuffersQueue.size() >= nframes) {
+                List<FloatBuffer> floatBuffers = new ArrayList<>();
                 for (int i = 0; i < inputs.size(); i++) {
+                    floatBuffers.add(FloatBuffer.allocate(nframes));
+                }
+                while (floatBuffers.get(0).hasRemaining()) {
+                    QueueItem item = floatBuffersQueue.poll();
+                    if (item != null) {
+                        for (int i = 0; i < floatBuffers.size(); i++) {
+                            floatBuffers.get(i).put(item.getFloats().get(i));
+                        }
+                    }
+                }
+                for (int i = 0; i < inputs.size(); i++) {
+                    floatBuffers.get(i).rewind();
                     inputs.get(i).getFloatBuffer().put(floatBuffers.get(i));
                 }
-                long time = System.currentTimeMillis();
-                long took = time - queueItem.getStartTime();
-                System.out.println("Audio took " + took + "ms to be sent to jack");
             }
             List<ByteBuffer> toSend = new ArrayList<>();
             int size = 0;

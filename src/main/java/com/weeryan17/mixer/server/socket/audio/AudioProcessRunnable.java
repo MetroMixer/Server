@@ -47,7 +47,17 @@ public class AudioProcessRunnable implements Runnable {
             floatBuffer.rewind();
             floatBuffers.add(floatBuffer);
         }
-        client.addToQueue(new QueueItem(floatBuffers, start));
+
+        while (floatBuffers.get(0).hasRemaining()) {
+            List<Float> floats = new ArrayList<>();
+            for (int i = 0; i < floatBuffers.size(); i++) {
+                FloatBuffer floatBuffer = floatBuffers.get(i);
+                floats.add(i, floatBuffer.get());
+            }
+            client.addToQueue(new QueueItem(floats, start));
+        }
+
+        //client.addToQueue(new QueueItem(floatBuffers, start));
         /*long end = System.currentTimeMillis();
         long process = end - start;
         System.out.println("It took " + process + "ms to process audio");*/

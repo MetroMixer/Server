@@ -32,9 +32,10 @@ public class WebController {
         createWsRoutes(http);
         createRoutes(http);
         http.init();
-        while (http.port() == 0) {
+        http.awaitInitialization();
+        /*while (http.port() == 0) {
 
-        }
+        }*/
         return http.port();
     }
 

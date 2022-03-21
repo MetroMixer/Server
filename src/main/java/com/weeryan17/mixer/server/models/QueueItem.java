@@ -5,20 +5,20 @@ import java.util.List;
 
 public class QueueItem {
 
-    private List<FloatBuffer> floatBuffers;
+    private List<Float> floats;
     private long startTime;
 
-    public QueueItem(List<FloatBuffer> floatBuffers, long startTime) {
-        this.floatBuffers = floatBuffers;
+    public QueueItem(List<Float> floats, long startTime) {
+        this.floats = floats;
         this.startTime = startTime;
     }
 
-    public List<FloatBuffer> getFloatBuffers() {
-        return floatBuffers;
+    public List<Float> getFloats() {
+        return floats;
     }
 
-    public void setFloatBuffers(List<FloatBuffer> floatBuffers) {
-        this.floatBuffers = floatBuffers;
+    public void setFloats(List<Float> floats) {
+        this.floats = floats;
     }
 
     public long getStartTime() {

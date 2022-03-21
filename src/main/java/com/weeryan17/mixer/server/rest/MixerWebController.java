@@ -22,9 +22,10 @@ public class MixerWebController {
             return "";
         });
         http.init();
-        while (http.port() == 0) {
+        http.awaitInitialization();
+        /*while (http.port() == 0) {
 
-        }
+        }*/
         return http.port();
     }
 
