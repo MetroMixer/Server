@@ -5,11 +5,12 @@ import org.simpleyaml.configuration.file.FileConfiguration;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Config {
 
     private Args commandLineArgs;
-    public Config(Args commandLineArgs) {
+    public Config(Args commandLineArgs) throws IOException {
         this.commandLineArgs = commandLineArgs;
         init();
     }
@@ -30,7 +31,7 @@ public class Config {
 
     private String apiPassword;
 
-    public void init() {
+    public void init() throws IOException {
         FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(new File(commandLineArgs.getConfigFile()));
 
         maxReceiveThreads = fileConfiguration.getInt("threads.receive", commandLineArgs.getMaxReceiveThreads());

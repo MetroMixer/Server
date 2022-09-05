@@ -2,6 +2,7 @@ package com.weeryan17.mixer.server.commandmeta;
 
 import com.weeryan17.mixer.server.commands.CreateChannelsCommand;
 import com.weeryan17.mixer.server.commands.IdentifyCommand;
+import com.weeryan17.mixer.server.commands.VolumeCommand;
 import com.weeryan17.mixer.shared.command.meta.CommandData;
 import com.weeryan17.mixer.shared.command.meta.CommandType;
 
@@ -12,11 +13,12 @@ import java.util.Locale;
 public enum CommandList {
 
     IDENTIFY(IdentifyCommand.class),
-    CREATE_CHANNELS(CreateChannelsCommand.class);
+    CREATE_CHANNELS(CreateChannelsCommand.class),
+    VOLUME(VolumeCommand.class);
 
     private String command;
     private Class<? extends Command> javaClass;
-    CommandList(String command, Class<? extends Command> javaClass) {
+    CommandList(String command, Class<? extends Command<?>> javaClass) {
         this.command = command;
         this.javaClass = javaClass;
     }

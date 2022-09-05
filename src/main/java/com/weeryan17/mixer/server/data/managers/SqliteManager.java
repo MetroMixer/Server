@@ -1,11 +1,11 @@
 package com.weeryan17.mixer.server.data.managers;
 
+import jakarta.persistence.Entity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.reflections.Reflections;
 
-import javax.persistence.Entity;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;

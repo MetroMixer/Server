@@ -4,30 +4,16 @@ import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.weeryan17.mixer.server.data.managers.SqliteManager;
-import com.weeryan17.mixer.server.rest.MixerWebController;
-import com.weeryan17.mixer.server.rest.WebController;
+import com.weeryan17.mixer.server.web.WebController;
 import com.weeryan17.mixer.server.socket.audio.AudioConnectSocketRunnable;
 import com.weeryan17.mixer.server.socket.BroadcastSocketRunnable;
 import com.weeryan17.mixer.shared.models.Version;
 import com.weeryan17.rudp.ReliableServerSocket;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.jaudiolibs.jnajack.Jack;
-import org.jaudiolibs.jnajack.JackClient;
-import org.jaudiolibs.jnajack.JackOptions;
-import org.jaudiolibs.jnajack.JackPort;
-import org.jaudiolibs.jnajack.JackPortFlags;
-import org.jaudiolibs.jnajack.JackPortType;
-import org.jaudiolibs.jnajack.JackProcessCallback;
-import org.jaudiolibs.jnajack.JackStatus;
-import org.simpleyaml.configuration.file.FileConfiguration;
-import org.simpleyaml.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.FloatBuffer;
-import java.util.EnumSet;
 import java.util.Properties;
 import java.util.Timer;
 
@@ -99,11 +85,11 @@ public class MixerServer {
         Timer timer = new Timer();
         timer.schedule(new HeartBeatTask(), 1000, 500);
 
-        MixerWebController mixerWebController = new MixerWebController(gson);
-        audioTcpPort = mixerWebController.initController();
+        WebController webController = new WebController(gson, config);
+        webController.initController();
 
-        WebController webController = new WebController(gson);
-        tcpPort = webController.initController();
+        tcpPort = webController.getApiPort();
+        audioTcpPort = webController.getMixerPort();
 
         jack = Jack.getInstance();
 

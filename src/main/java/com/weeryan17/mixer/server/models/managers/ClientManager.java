@@ -38,7 +38,7 @@ public class ClientManager {
         pendingClients.remove(pendingClients.stream().filter(pendingContainer -> pendingContainer.getIdentifyProperties().equals(id)).findFirst().orElse(null));
         MixerServer.getInstance().getSqliteManager().transaction(session -> {
             ApprovedClient approvedClient = new ApprovedClient(key);
-            session.save(approvedClient);
+            session.persist(approvedClient);
         });
         return client;
     }

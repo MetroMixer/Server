@@ -2,7 +2,7 @@ package com.weeryan17.mixer.server.commands;
 
 import com.weeryan17.mixer.server.commandmeta.Command;
 import com.weeryan17.mixer.server.models.Client;
-import com.weeryan17.mixer.server.rest.MixerWebSocket;
+import com.weeryan17.mixer.server.web.routes.mixer.MixerWebSocket;
 import com.weeryan17.mixer.shared.command.data.CreateChannels;
 import com.weeryan17.mixer.shared.command.meta.CommandType;
 import com.weeryan17.mixer.shared.models.ChannelInfo;

@@ -1,7 +1,7 @@
 package com.weeryan17.mixer.server.commandmeta;
 
 import com.weeryan17.mixer.server.models.Client;
-import com.weeryan17.mixer.server.rest.MixerWebSocket;
+import com.weeryan17.mixer.server.web.routes.mixer.MixerWebSocket;
 import com.weeryan17.mixer.shared.command.meta.CommandData;
 import org.eclipse.jetty.websocket.api.Session;
 

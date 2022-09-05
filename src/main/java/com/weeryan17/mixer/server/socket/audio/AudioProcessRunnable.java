@@ -57,10 +57,6 @@ public class AudioProcessRunnable implements Runnable {
             client.addToQueue(new QueueItem(floats, start));
         }
 
-        //client.addToQueue(new QueueItem(floatBuffers, start));
-        /*long end = System.currentTimeMillis();
-        long process = end - start;
-        System.out.println("It took " + process + "ms to process audio");*/
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
