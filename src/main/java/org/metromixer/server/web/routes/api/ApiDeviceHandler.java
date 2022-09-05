@@ -8,6 +8,7 @@ import org.metromixer.server.models.exceptions.DeviceDoesNotExistException;
 import org.metromixer.server.models.managers.ClientManager;
 import org.metromixer.server.models.web.WebHandlerObjects;
 import org.metromixer.server.models.web.api.device.ApproveDevice;
+import org.metromixer.server.models.web.api.device.SimpleClient;
 import org.metromixer.server.web.WebHandler;
 import org.metromixer.server.web.WebRoot;
 import org.metromixer.shared.command.data.IdentifyProperties;
@@ -25,7 +26,7 @@ public class ApiDeviceHandler extends WebHandler {
 
     @Override
     public void init() {
-        get(OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).jsonArray("200", Client.class)
+        get(OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).jsonArray("200", SimpleClient.class)
                 .json("401", AuthException.class), ctx -> {
             ctx.json(ClientManager.getInstance().getClientList());
             ctx.status(200);
@@ -33,11 +34,11 @@ public class ApiDeviceHandler extends WebHandler {
         post("/add", ctx -> {
             throw new RuntimeException("Not yet implemented");
         });
-        get("/pending", OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).jsonArray("200", IdentifyProperties.class).json("401", AuthException.class), ctx -> {
+        get("/pending", OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).jsonArray("200", IdentifyProperties.class).json("401", AuthException.class), ctx -> {
             ctx.json(ClientManager.getInstance().getPendingClients().stream().map(PendingContainer::getIdentifyProperties).collect(Collectors.toList()));
             ctx.status(200);
         }));
-        post("/accept", OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).body(ApproveDevice.class).result("200")
+        post("/accept", OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).body(ApproveDevice.class).result("200")
                 .json("401", AuthException.class).json("404", DeviceDoesNotExistException.class), ctx -> {
             ApproveDevice device = ctx.bodyAsClass(ApproveDevice.class);
             PendingContainer container = ClientManager.getInstance().getPendingClients().stream()

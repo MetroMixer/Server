@@ -2,7 +2,6 @@ package org.metromixer.server.web.routes.api;
 
 import io.javalin.plugin.openapi.dsl.OpenApiBuilder;
 import org.metromixer.server.MixerServer;
-import org.metromixer.server.models.ApiSession;
 import org.metromixer.server.models.exceptions.AuthException;
 import org.metromixer.server.models.managers.ApiManager;
 import org.metromixer.server.models.web.WebHandlerObjects;
@@ -15,8 +14,8 @@ import org.metromixer.server.web.WebRoot;
 import static io.javalin.apibuilder.ApiBuilder.*;
 
 @WebRoot
-public class ApiHandler extends WebHandler {
-    public ApiHandler(WebHandlerObjects objects) {
+public class ApiWebHandler extends WebHandler {
+    public ApiWebHandler(WebHandlerObjects objects) {
         super(objects);
     }
 
@@ -36,6 +35,8 @@ public class ApiHandler extends WebHandler {
             }
             String key = RandomUtils.getInstance().randomKey();
             ConnectionApproved connectionApproved = new ConnectionApproved(key);
+            ApiManager.getInstance().createSession(key);
+
             ctx.json(connectionApproved);
             ctx.status(200);
         }));

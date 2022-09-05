@@ -2,7 +2,6 @@ package org.metromixer.server.models;
 
 import com.google.common.collect.EvictingQueue;
 import com.google.gson.Gson;
-import jakarta.persistence.Transient;
 import org.metromixer.server.MixerServer;
 import org.metromixer.server.socket.audio.AudioSendRunnable;
 import org.metromixer.server.utils.ThreadExecutorContainer;
@@ -28,28 +27,21 @@ import java.util.Queue;
 
 public class Client {
 
-    @Transient
     private transient Gson gson;
 
-    @Transient
     private transient JackClient jackClient;
 
-    @Transient
     private transient List<JackPort> inputs = new ArrayList<>();
-    @Transient
     private transient List<JackPort> outputs = new ArrayList<>();
 
-    @Transient
     private transient Queue<QueueItem> floatBuffersQueue = EvictingQueue.create(1050);
 
-    @Transient
     private transient Socket socket;
 
     private IdentifyProperties id;
 
     private long beatInterval;
 
-    @Transient
     private transient ThreadExecutorContainer sendContainer;
 
     public Client(Gson gson, IdentifyProperties id, long beatInterval, ThreadExecutorContainer sendContainer) throws JackException {
@@ -82,9 +74,8 @@ public class Client {
         return beatInterval;
     }
 
-    @Transient
     private transient Session session;
-    private String key;
+    private transient String key;
     private long lastBeatTime = -1;
 
     public Session getSession() {

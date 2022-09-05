@@ -3,6 +3,7 @@ package org.metromixer.server.web;
 import com.google.gson.Gson;
 import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
+import io.javalin.plugin.openapi.ui.ReDocOptions;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.swagger.v3.oas.models.info.Info;
 import org.metromixer.server.Config;
@@ -37,11 +38,12 @@ public class WebController {
 
     public void initController() {
         WebHandlerObjects handlerObjects = new WebHandlerObjects(gson);
-        apiPort = initApiController(handlerObjects);
+        GsonJsonMapper mapper = new GsonJsonMapper(gson);
+        apiPort = initApiController(handlerObjects, mapper);
         mixerPort = initMixerController(handlerObjects);
     }
 
-    private int initApiController(WebHandlerObjects handlerObjects) {
+    private int initApiController(WebHandlerObjects handlerObjects, GsonJsonMapper gsonJsonMapper) {
         Javalin app = Javalin.create(javalinConfig -> {
             javalinConfig.jsonMapper(new GsonJsonMapper(gson));
             javalinConfig.showJavalinBanner = false;
@@ -49,14 +51,14 @@ public class WebController {
             javalinConfig.registerPlugin(new OpenApiPlugin(
                     new OpenApiOptions(new Info().version("1.0").description("Metromixer api"))
                             .path("/swagger-docs")
-                            .toJsonMapper(new GsonJsonMapper(gson))
+                            .toJsonMapper(gsonJsonMapper)
                             .swagger(new SwaggerOptions("/swagger"))
+                            .reDoc(new ReDocOptions("/redoc"))
             ));
         });
 
         app.before(ctx -> {
-            String path = ctx.path();
-            if (ctx.path().equals("/connect") || ctx.path().contains("swagger")) {
+            if (ctx.path().equals("/connect") || ctx.path().contains("swagger") || ctx.path().contains("redoc")) {
                 return;
             }
             String auth = ctx.header("Auth");
