@@ -4,21 +4,85 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.weeryan17.mixer</groupId>
+    <groupId>org.metromixer</groupId>
     <artifactId>MixerServer</artifactId>
     <version>${server.version}</version>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <hibernate.version>6.1.2.Final</hibernate.version>
     </properties>
 
     <build>
+        <finalName>${artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <release>${maven.compiler.target}</release>
+                </configuration>
+                <executions>
+                    <!-- Replacing default-compile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <!-- Replacing default-testCompile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>java-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>java-test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <!-- get all project dependencies -->
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.metromixer.server.MixerServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- bind to the packaging phase -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>true</filtering>
             </resource>
         </resources>
     </build>
@@ -26,7 +90,11 @@
     <repositories>
         <repository>
             <id>prod</id>
-            <url>https://maven.weeryan17.com/repository/internal</url>
+            <url>https://maven.weeryan17.com/releases</url>
+        </repository>
+        <repository>
+            <id>local</id>
+            <url>https://maven.weeryan17.com/snapshots</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -41,14 +109,14 @@
             <version>1.4.0</version>
         </dependency>
         <dependency>
-            <groupId>com.weeryan17.mixer</groupId>
+            <groupId>org.metromixer</groupId>
             <artifactId>RUDP</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.weeryan17.mixer</groupId>
+            <groupId>org.metromixer</groupId>
             <artifactId>Shared</artifactId>
-            <version>1.4.2-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
