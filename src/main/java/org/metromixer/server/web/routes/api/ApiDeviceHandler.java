@@ -1,12 +1,16 @@
 package org.metromixer.server.web.routes.api;
 
+import io.javalin.plugin.openapi.dsl.OpenApiBuilder;
+import org.metromixer.server.models.Client;
 import org.metromixer.server.models.PendingContainer;
+import org.metromixer.server.models.exceptions.AuthException;
 import org.metromixer.server.models.exceptions.DeviceDoesNotExistException;
 import org.metromixer.server.models.managers.ClientManager;
 import org.metromixer.server.models.web.WebHandlerObjects;
 import org.metromixer.server.models.web.api.device.ApproveDevice;
 import org.metromixer.server.web.WebHandler;
 import org.metromixer.server.web.WebRoot;
+import org.metromixer.shared.command.data.IdentifyProperties;
 
 import java.util.stream.Collectors;
 
@@ -21,29 +25,31 @@ public class ApiDeviceHandler extends WebHandler {
 
     @Override
     public void init() {
-        get(ctx -> {
+        get(OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).jsonArray("200", Client.class)
+                .json("401", AuthException.class), ctx -> {
             ctx.json(ClientManager.getInstance().getClientList());
             ctx.status(200);
-        });
+        }));
         post("/add", ctx -> {
             throw new RuntimeException("Not yet implemented");
         });
-        get("/pending", ctx -> {
+        get("/pending", OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).jsonArray("200", IdentifyProperties.class).json("401", AuthException.class), ctx -> {
             ctx.json(ClientManager.getInstance().getPendingClients().stream().map(PendingContainer::getIdentifyProperties).collect(Collectors.toList()));
             ctx.status(200);
-        });
-        post("/accept", ctx -> {
+        }));
+        post("/accept", OpenApiBuilder.documented(OpenApiBuilder.document().header("key", String.class).body(ApproveDevice.class).result("200")
+                .json("401", AuthException.class).json("404", DeviceDoesNotExistException.class), ctx -> {
             ApproveDevice device = ctx.bodyAsClass(ApproveDevice.class);
             PendingContainer container = ClientManager.getInstance().getPendingClients().stream()
                     .filter(pendingContainer -> pendingContainer.getIdentifyProperties().getId().equals(device.getDeviceId())).findFirst().orElse(null);
 
             if (container == null) {
-                throw new DeviceDoesNotExistException(device.getDeviceId());
+                throw new DeviceDoesNotExistException("The specified device is not pending approval, or does not exist!", device.getDeviceId());
             }
 
             container.getAcceptConsumer().apply(true);
             ctx.status(200);
-        });
+        }));
         delete(ctx -> {
             throw new RuntimeException("Not yet implemented");
         });

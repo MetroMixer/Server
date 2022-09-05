@@ -1,7 +1,13 @@
 package org.metromixer.server.models.exceptions;
 
-public class AuthException extends Exception {
-    public AuthException(String message) {
-        super(message);
+import io.javalin.http.HttpResponseException;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+
+public class AuthException extends HttpResponseException {
+    public AuthException(@NotNull String message) {
+        super(401, message);
     }
+
 }

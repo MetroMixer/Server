@@ -1,7 +1,14 @@
 package org.metromixer.server.web;
 
 import com.google.gson.Gson;
+import io.javalin.plugin.openapi.OpenApiOptions;
+import io.javalin.plugin.openapi.OpenApiPlugin;
+import io.javalin.plugin.openapi.ui.SwaggerOptions;
+import io.swagger.v3.oas.models.info.Info;
 import org.metromixer.server.Config;
+import org.metromixer.server.models.ApiSession;
+import org.metromixer.server.models.exceptions.AuthException;
+import org.metromixer.server.models.managers.ApiManager;
 import org.metromixer.server.models.web.WebHandlerObjects;
 import org.metromixer.server.utils.GsonJsonMapper;
 import io.javalin.Javalin;
@@ -39,6 +46,28 @@ public class WebController {
             javalinConfig.jsonMapper(new GsonJsonMapper(gson));
             javalinConfig.showJavalinBanner = false;
             javalinConfig.enableCorsForAllOrigins();
+            javalinConfig.registerPlugin(new OpenApiPlugin(
+                    new OpenApiOptions(new Info().version("1.0").description("Metromixer api"))
+                            .path("/swagger-docs")
+                            .toJsonMapper(new GsonJsonMapper(gson))
+                            .swagger(new SwaggerOptions("/swagger"))
+            ));
+        });
+
+        app.before(ctx -> {
+            String path = ctx.path();
+            if (ctx.path().equals("/connect") || ctx.path().contains("swagger")) {
+                return;
+            }
+            String auth = ctx.header("Auth");
+            if (auth == null) {
+                throw new AuthException("Header not provided");
+            }
+
+            ApiSession session = ApiManager.getInstance().getSessionFromKey(auth);
+            if (session == null) {
+                throw new AuthException("Key is invalid");
+            }
         });
 
         Map<String, List<WebHandler>> webHandlerMap = getWebHandlers("org.metromixer.server.web.routes.api", handlerObjects);
@@ -61,6 +90,10 @@ public class WebController {
             javalinConfig.jsonMapper(new GsonJsonMapper(gson));
             javalinConfig.showJavalinBanner = false;
             javalinConfig.enableCorsForAllOrigins();
+        });
+
+        app.before(ctx -> {
+
         });
 
         Map<String, List<WebHandler>> webHandlerMap = getWebHandlers("org.metromixer.mixer.server.web.routes.mixer", handlerObjects);

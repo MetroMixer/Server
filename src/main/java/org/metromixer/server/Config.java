@@ -1,9 +1,10 @@
 package org.metromixer.server;
 
-import org.simpleyaml.configuration.file.FileConfiguration;
+import org.simpleyaml.configuration.Configuration;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Config {
@@ -31,7 +32,12 @@ public class Config {
     private String apiPassword;
 
     public void init() throws IOException {
-        FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(new File(commandLineArgs.getConfigFile()));
+        Configuration fileConfiguration;
+        try {
+            fileConfiguration = YamlConfiguration.loadConfiguration(new File(commandLineArgs.getConfigFile()));
+        } catch (FileNotFoundException e) {
+            fileConfiguration = new YamlConfiguration();
+        }
 
         maxReceiveThreads = fileConfiguration.getInt("threads.receive", commandLineArgs.getMaxReceiveThreads());
         maxConnectThreads = fileConfiguration.getInt("threads.connect", commandLineArgs.getMaxConnectThreads());

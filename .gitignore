@@ -1,3 +1,7 @@
 .idea
 target
-*.db
+/data/
+
+logs/
+
+derby.log

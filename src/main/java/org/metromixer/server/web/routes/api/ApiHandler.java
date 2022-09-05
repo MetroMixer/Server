@@ -1,5 +1,6 @@
 package org.metromixer.server.web.routes.api;
 
+import io.javalin.plugin.openapi.dsl.OpenApiBuilder;
 import org.metromixer.server.MixerServer;
 import org.metromixer.server.models.ApiSession;
 import org.metromixer.server.models.exceptions.AuthException;
@@ -21,21 +22,7 @@ public class ApiHandler extends WebHandler {
 
     @Override
     public void init() {
-        before(ctx -> {
-            if (ctx.path().equals("/connect")) {
-                return;
-            }
-            String auth = ctx.header("Auth");
-            if (auth == null) {
-                throw new AuthException("Header not provided");
-            }
-
-            ApiSession session = ApiManager.getInstance().getSessionFromKey(auth);
-            if (session == null) {
-                throw new AuthException("Key is invalid");
-            }
-        });
-        post("/connect", ctx -> {
+        post("/connect", OpenApiBuilder.documented(OpenApiBuilder.document().body(Connect.class).json("200", ConnectionApproved.class), ctx -> {
             String password = MixerServer.getInstance().getConfig().getApiPassword();
             if (password != null) {
                 Connect connect = ctx.bodyAsClass(Connect.class);
@@ -51,6 +38,6 @@ public class ApiHandler extends WebHandler {
             ConnectionApproved connectionApproved = new ConnectionApproved(key);
             ctx.json(connectionApproved);
             ctx.status(200);
-        });
+        }));
     }
 }

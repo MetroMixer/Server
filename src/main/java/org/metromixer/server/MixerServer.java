@@ -3,7 +3,7 @@ package org.metromixer.server;
 import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.metromixer.server.data.managers.SqliteManager;
+import org.metromixer.server.data.managers.DerbyManager;
 import org.metromixer.server.web.WebController;
 import org.metromixer.server.socket.audio.AudioConnectSocketRunnable;
 import org.metromixer.server.socket.BroadcastSocketRunnable;
@@ -11,6 +11,8 @@ import org.metromixer.shared.models.Version;
 import org.metromixer.rudp.ReliableServerSocket;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.jaudiolibs.jnajack.Jack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -43,9 +45,12 @@ public class MixerServer {
     private int audioUdpPort = 1;
     private int audioTcpPort = 1;
     private int tcpPort = 1;
-    private SqliteManager sqliteManager;
+    private DerbyManager sqliteManager;
+
+    private Logger logger;
 
     public void init(String... args) throws Exception {
+        logger = LoggerFactory.getLogger(getClass());
         Args argObj = new Args();
         JCommander jCommander = JCommander.newBuilder().addObject(argObj).build();
         jCommander.parse(args);
@@ -57,7 +62,7 @@ public class MixerServer {
 
         config = new Config(argObj);
 
-        sqliteManager = new SqliteManager("data.db");
+        sqliteManager = new DerbyManager("data");
 
         Properties properties = new Properties();
         properties.load(getClass().getClassLoader().getResourceAsStream("version.properties"));
@@ -91,6 +96,8 @@ public class MixerServer {
         tcpPort = webController.getApiPort();
         audioTcpPort = webController.getMixerPort();
 
+        logger.info("Api port: " + tcpPort);
+
         jack = Jack.getInstance();
     }
 
@@ -114,7 +121,7 @@ public class MixerServer {
         return config;
     }
 
-    public SqliteManager getSqliteManager() {
+    public DerbyManager getSqliteManager() {
         return sqliteManager;
     }
 

@@ -2,6 +2,7 @@ package org.metromixer.server.utils;
 
 import com.google.gson.Gson;
 import io.javalin.plugin.json.JsonMapper;
+import io.javalin.plugin.openapi.jackson.ToJsonMapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -9,7 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-public class GsonJsonMapper implements JsonMapper {
+public class GsonJsonMapper implements JsonMapper, ToJsonMapper {
 
     private Gson gson;
     public GsonJsonMapper(Gson gson) {
@@ -38,5 +39,11 @@ public class GsonJsonMapper implements JsonMapper {
     @Override
     public <T> T fromJsonStream(@NotNull InputStream json, @NotNull Class<T> targetClass) {
         return gson.fromJson(new InputStreamReader(json), targetClass);
+    }
+
+    @NotNull
+    @Override
+    public String map(@NotNull Object o) {
+        return gson.toJson(o);
     }
 }

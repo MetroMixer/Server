@@ -1,15 +1,16 @@
 package org.metromixer.server.models.exceptions;
 
-public class DeviceDoesNotExistException extends Exception {
+import io.javalin.http.HttpResponseException;
+import org.jetbrains.annotations.NotNull;
 
-    private final String deviceId;
+import java.util.HashMap;
+import java.util.Map;
 
-    public DeviceDoesNotExistException(String deviceId) {
-        super();
-        this.deviceId = deviceId;
+public class DeviceDoesNotExistException extends HttpResponseException {
+
+
+    public DeviceDoesNotExistException(@NotNull String message, String deviceId) {
+        super(404, message, Map.of("device_id", deviceId));
     }
 
-    public String getDeviceId() {
-        return deviceId;
-    }
 }
