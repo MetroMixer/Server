@@ -26,20 +26,18 @@ public class ApiDeviceHandler extends WebHandler {
 
     @Override
     public void init() {
-        get(OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).jsonArray("200", SimpleClient.class)
-                .json("401", AuthException.class), ctx -> {
+        get(ctx -> {
             ctx.json(ClientManager.getInstance().getClientList());
             ctx.status(200);
-        }));
+        });
         post("/add", ctx -> {
             throw new RuntimeException("Not yet implemented");
         });
-        get("/pending", OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).jsonArray("200", IdentifyProperties.class).json("401", AuthException.class), ctx -> {
+        get("/pending", ctx -> {
             ctx.json(ClientManager.getInstance().getPendingClients().stream().map(PendingContainer::getIdentifyProperties).collect(Collectors.toList()));
             ctx.status(200);
-        }));
-        post("/accept", OpenApiBuilder.documented(OpenApiBuilder.document().header("Auth", String.class).body(ApproveDevice.class).result("200")
-                .json("401", AuthException.class).json("404", DeviceDoesNotExistException.class), ctx -> {
+        });
+        post("/accept", ctx -> {
             ApproveDevice device = ctx.bodyAsClass(ApproveDevice.class);
             PendingContainer container = ClientManager.getInstance().getPendingClients().stream()
                     .filter(pendingContainer -> pendingContainer.getIdentifyProperties().getId().equals(device.getDeviceId())).findFirst().orElse(null);
@@ -50,7 +48,7 @@ public class ApiDeviceHandler extends WebHandler {
 
             container.getAcceptConsumer().apply(true);
             ctx.status(200);
-        }));
+        });
         delete(ctx -> {
             throw new RuntimeException("Not yet implemented");
         });

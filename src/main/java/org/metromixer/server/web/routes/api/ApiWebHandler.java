@@ -21,7 +21,7 @@ public class ApiWebHandler extends WebHandler {
 
     @Override
     public void init() {
-        post("/connect", OpenApiBuilder.documented(OpenApiBuilder.document().body(Connect.class).json("200", ConnectionApproved.class), ctx -> {
+        post("/connect", ctx -> {
             String password = MixerServer.getInstance().getConfig().getApiPassword();
             if (password != null) {
                 Connect connect = ctx.bodyAsClass(Connect.class);
@@ -39,6 +39,6 @@ public class ApiWebHandler extends WebHandler {
 
             ctx.json(connectionApproved);
             ctx.status(200);
-        }));
+        });
     }
 }

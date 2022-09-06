@@ -48,17 +48,17 @@ public class WebController {
             javalinConfig.jsonMapper(new GsonJsonMapper(gson));
             javalinConfig.showJavalinBanner = false;
             javalinConfig.enableCorsForAllOrigins();
-            javalinConfig.registerPlugin(new OpenApiPlugin(
+            /*javalinConfig.registerPlugin(new OpenApiPlugin(
                     new OpenApiOptions(new Info().version("1.0").description("Metromixer api"))
                             .path("/swagger-docs")
                             .toJsonMapper(gsonJsonMapper)
                             .swagger(new SwaggerOptions("/swagger"))
                             .reDoc(new ReDocOptions("/redoc"))
-            ));
+            ));*/
         });
 
         app.before(ctx -> {
-            if (ctx.path().equals("/connect") || ctx.path().contains("swagger") || ctx.path().contains("redoc")) {
+            if (ctx.path().equals("/connect") /* || ctx.path().contains("swagger") || ctx.path().contains("redoc") */) {
                 return;
             }
             String auth = ctx.header("Auth");
