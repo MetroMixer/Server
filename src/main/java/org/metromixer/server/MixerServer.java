@@ -143,4 +143,8 @@ public class MixerServer {
     public Version getApiVersion() {
         return apiVersion;
     }
+
+    public Logger getLogger() {
+        return logger;
+    }
 }

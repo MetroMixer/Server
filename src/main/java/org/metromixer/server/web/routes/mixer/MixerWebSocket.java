@@ -51,7 +51,7 @@ public class MixerWebSocket extends WebHandler {
                     sendCommand(session, CommandType.INVALID, new Invalid(1, "Key is not valid", false));
                 }
                 if (client != null) {
-                    sendCommand(session, CommandType.INIT, new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort()));
+                    sendCommand(session, CommandType.INIT, new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort(), MixerServer.getInstance().getConfig().shouldCompress()));
                     client.setSession(session);
                     client.updateLastBeatTime();
                 }

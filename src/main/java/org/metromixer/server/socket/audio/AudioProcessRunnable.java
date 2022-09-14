@@ -1,5 +1,6 @@
 package org.metromixer.server.socket.audio;
 
+import org.metromixer.server.MixerServer;
 import org.metromixer.server.models.Client;
 import org.metromixer.server.models.QueueItem;
 import org.metromixer.server.models.managers.ClientManager;
@@ -11,6 +12,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipException;
 
 public class AudioProcessRunnable implements Runnable {
 
@@ -33,7 +35,12 @@ public class AudioProcessRunnable implements Runnable {
         try {
             GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(this.audio));
             audio = gzipInputStream.readAllBytes();
-        } catch (IOException ignored) {}
+        } catch (ZipException ignored) {
+
+        } catch (IOException e) {
+            MixerServer.getInstance().getLogger().warn("Error de-compressing audio", e);
+            return;
+        }
         //System.out.println(bytesToHex(audio));
         ByteBuffer buffer = ByteBuffer.wrap(audio);
         int channels = buffer.getInt();

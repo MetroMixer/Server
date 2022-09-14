@@ -1,6 +1,5 @@
 package org.metromixer.server.web.routes.api;
 
-import io.javalin.plugin.openapi.dsl.OpenApiBuilder;
 import org.metromixer.server.MixerServer;
 import org.metromixer.server.models.exceptions.AuthException;
 import org.metromixer.server.models.managers.ApiManager;

@@ -1,11 +1,6 @@
 package org.metromixer.server.web;
 
 import com.google.gson.Gson;
-import io.javalin.plugin.openapi.OpenApiOptions;
-import io.javalin.plugin.openapi.OpenApiPlugin;
-import io.javalin.plugin.openapi.ui.ReDocOptions;
-import io.javalin.plugin.openapi.ui.SwaggerOptions;
-import io.swagger.v3.oas.models.info.Info;
 import org.metromixer.server.Config;
 import org.metromixer.server.models.ApiSession;
 import org.metromixer.server.models.exceptions.AuthException;

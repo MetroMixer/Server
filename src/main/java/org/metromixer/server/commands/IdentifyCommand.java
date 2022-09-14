@@ -34,7 +34,7 @@ public class IdentifyCommand implements Command<IdentifyProperties> {
                 }
                 acceptedClient.setSession(session);
                 acceptedClient.updateLastBeatTime();
-                Init init = new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort(), key);
+                Init init = new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort(), MixerServer.getInstance().getConfig().shouldCompress(), key);
                 try {
                     mixerWebSocket.sendCommand(session, CommandType.INIT, init);
                 } catch (IOException e) {
@@ -45,7 +45,7 @@ public class IdentifyCommand implements Command<IdentifyProperties> {
             });
             ClientManager.getInstance().getPendingClients().add(pendingContainer);
         } else {
-            Init init = new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort());
+            Init init = new Init(ClientManager.getInstance().getHeartbeat(), MixerServer.getInstance().getAudioUdpPort(), MixerServer.getInstance().getConfig().shouldCompress());
             try {
                 mixerWebSocket.sendCommand(session, CommandType.INIT, init);
             } catch (IOException e) {

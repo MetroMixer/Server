@@ -22,16 +22,14 @@ public class ClientManager {
 
     private final ThreadExecutorContainer sendContainer;
 
-    private Gson gson;
     private long heartbeat;
-    public ClientManager(Gson gson, long heartbeat) {
+    public ClientManager(long heartbeat) {
         sendContainer = new ThreadExecutorContainer("AudioSendProcess", 50);
-        this.gson = gson;
         this.heartbeat = heartbeat;
     }
 
     public Client buildClient(String key, IdentifyProperties id) throws JackException {
-        Client client = new Client(gson, id, heartbeat, sendContainer);
+        Client client = new Client(id, heartbeat, sendContainer);
         client.setKey(key);
         clientList.add(client);
         pendingClients.remove(pendingClients.stream().filter(pendingContainer -> pendingContainer.getIdentifyProperties().equals(id)).findFirst().orElse(null));
@@ -65,7 +63,7 @@ public class ClientManager {
     private static ClientManager INS;
     public static ClientManager getInstance() {
         if (INS == null) {
-            INS = new ClientManager(new GsonBuilder().registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory()).create(), MixerServer.getInstance().getConfig().getAudioHeartbeat());
+            INS = new ClientManager(MixerServer.getInstance().getConfig().getAudioHeartbeat());
         }
         return INS;
     }

@@ -1,7 +1,7 @@
 package org.metromixer.server.models;
 
-import com.google.common.collect.EvictingQueue;
 import com.google.gson.Gson;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.metromixer.server.MixerServer;
 import org.metromixer.server.socket.audio.AudioSendRunnable;
 import org.metromixer.server.utils.ThreadExecutorContainer;
@@ -27,14 +27,14 @@ import java.util.Queue;
 
 public class Client {
 
-    private transient Gson gson;
-
     private transient JackClient jackClient;
 
     private transient List<JackPort> inputs = new ArrayList<>();
     private transient List<JackPort> outputs = new ArrayList<>();
 
-    private transient Queue<QueueItem> floatBuffersQueue = EvictingQueue.create(1050);
+    //private transient Queue<Float[]> pastInputs;
+
+    private transient Queue<QueueItem> floatBuffersQueue;
 
     private transient Socket socket;
 
@@ -44,12 +44,13 @@ public class Client {
 
     private transient ThreadExecutorContainer sendContainer;
 
-    public Client(Gson gson, IdentifyProperties id, long beatInterval, ThreadExecutorContainer sendContainer) throws JackException {
-        this.gson = gson;
+    public Client(IdentifyProperties id, long beatInterval, ThreadExecutorContainer sendContainer) throws JackException {
         this.beatInterval = beatInterval;
         this.id = id;
         this.sendContainer = sendContainer;
         jackClient = MixerServer.getInstance().getJack().openClient(id.getId(), EnumSet.noneOf(JackOptions.class), EnumSet.noneOf(JackStatus.class));
+        //pastInputs = new CircularFifoQueue<>(jackClient.getBufferSize());
+        floatBuffersQueue = new CircularFifoQueue<>(jackClient.getBufferSize() + 50);
         jackClient.setProcessCallback(new Processor(this));
         jackClient.activate();
     }
@@ -138,6 +139,9 @@ public class Client {
                 while (floatBuffers.get(0).hasRemaining()) {
                     QueueItem item = floatBuffersQueue.poll();
                     if (item != null) {
+                        /*Float[] floats = new Float[floatBuffers.size()];
+                        item.getFloats().toArray(floats);
+                        pastInputs.add(floats);*/
                         for (int i = 0; i < floatBuffers.size(); i++) {
                             floatBuffers.get(i).put(item.getFloats().get(i));
                         }
